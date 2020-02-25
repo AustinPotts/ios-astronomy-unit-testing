@@ -11,37 +11,39 @@ import Foundation
 class MarsRoverClient {
     
     // Create instance of Network Data Loader for use
-    let dataLoader: NetworkDataLoader
+    let networkLoader: NetworkDataLoader
     var error: Error?
        
-       init(dataLoader: NetworkDataLoader = URLSession.shared) {
-           self.dataLoader = dataLoader
+       init(networkLoader: NetworkDataLoader = URLSession.shared) {
+           self.networkLoader = networkLoader
        }
     
     
     
-    func fetchMarsRover(named name: String,
-                        using session: URLSession = URLSession.shared,
-                        completion: @escaping (MarsRover?, Error?) -> Void) {
-        
-        let url = self.url(forInfoForRover: name)
-        fetch(from: url, using: session) { (dictionary: [String : MarsRover]?, error: Error?) in
-
-            guard let rover = dictionary?["photo_manifest"] else {
-                completion(nil, error)
-                return
-            }
-            completion(rover, nil)
-        }
-    }
+       func fetchMarsRover(named name: String,
+                        // Change session to use NetworkDataLoader
+                         using session: NetworkDataLoader = URLSession.shared,
+                         completion: @escaping (MarsRover?, Error?) -> Void) {
+         
+         let url = self.url(forInfoForRover: name)
+         fetch(from: url, using: networkLoader) { (dictionary: [String : MarsRover]?, error: Error?) in
+             
+             guard let rover = dictionary?["photo_manifest"] else {
+                 completion(nil, error)
+                 return
+             }
+             completion(rover, nil)
+         }
+     }
     
     func fetchPhotos(from rover: MarsRover,
                      onSol sol: Int,
-                     using session: URLSession = URLSession.shared,
+                     // Change session to use NetworkDataLoader
+                     using session: NetworkDataLoader = URLSession.shared,
                      completion: @escaping ([MarsPhotoReference]?, Error?) -> Void) {
         
         let url = self.url(forPhotosfromRover: rover.name, on: sol)
-        fetch(from: url, using: session) { (dictionary: [String : [MarsPhotoReference]]?, error: Error?) in
+        fetch(from: url, using: networkLoader) { (dictionary: [String : [MarsPhotoReference]]?, error: Error?) in
             guard let photos = dictionary?["photos"] else {
                 completion(nil, error)
                 return
@@ -53,14 +55,15 @@ class MarsRoverClient {
     // MARK: - Private
     
     private func fetch<T: Codable>(from url: URL,
-                           using session: URLSession = URLSession.shared,
+                          // Change session to use NetworkDataLoader
+                           using session: NetworkDataLoader = URLSession.shared,
                            completion: @escaping (T?, Error?) -> Void) {
         
         // Added Request URL's to use with Data Loader
-         let requestURL = baseURL
-         let request = URLRequest(url: requestURL)
+//         let requestURL = baseURL
+//         let request = URLRequest(url: requestURL)
         
-        dataLoader.loadData(using: request) { (data, response, error) in
+        networkLoader.loadData(from: url) { (data, response, error) in
             if let error = error {
                 completion(nil, error)
                 return
