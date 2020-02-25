@@ -33,7 +33,7 @@ class AstronomyTests: XCTestCase {
            let client = MarsRoverClient()
            let resultsExpectation = expectation(description: "Waiting on Mars Rover")
            
-           client.fetchMarsRover(named: "hgrnaiorrwfgwqaml") { (possibleRover, possibleError) in
+           client.fetchMarsRover(named: "sdihoudhsouhdsoudh") { (possibleRover, possibleError) in
                if let possibleError = possibleError {
                    error = possibleError
                }
